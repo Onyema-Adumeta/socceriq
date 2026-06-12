@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soccer Who Am I - Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", sans-serif; background: #0a0e14; color: #e8edf5; min-height: 100vh; }
+    .header { background: #111620; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    .header h1 { font-size: 1.3rem; color: #00e676; }
+    .header span { color: #8b95aa; font-size: 0.9rem; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: #1c2333; color: #8b95aa; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .tab.active { background: #00e676; color: #000; border-color: #00e676; font-weight: 700; }
+    .tab:hover:not(.active) { border-color: #00bcd4; color: #00bcd4; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: #1c2333; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 1.1rem; margin-bottom: 20px; color: #00e676; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8b95aa; }
+    input, select, textarea { background: #111620; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 14px; color: #e8edf5; font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s; width: 100%; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #00e676; }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.2s; }
+    .btn-primary { background: #00e676; color: #000; }
+    .btn-primary:hover { background: #00ff8a; }
+    .btn-secondary { background: #1c2333; color: #e8edf5; border: 1px solid rgba(255,255,255,0.08); }
+    .btn-secondary:hover { border-color: #00bcd4; color: #00bcd4; }
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #1c2333; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-number { font-size: 2.5rem; font-weight: 800; color: #00e676; }
+    .stat-label { font-size: 0.75rem; color: #8b95aa; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .players-table { width: 100%; border-collapse: collapse; }
+    .players-table th { text-align: left; padding: 12px; background: #111620; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8b95aa; }
+    .players-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.875rem; }
+    .diff-badge { padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: capitalize; }
+    .diff-easy { background: rgba(100,181,246,0.15); color: #64b5f6; }
+    .diff-medium { background: rgba(255,183,77,0.15); color: #ffb74d; }
+    .diff-hard { background: rgba(239,83,80,0.15); color: #ef5350; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 0.9rem; }
+    .alert-success { background: rgba(0,230,118,0.1); border: 1px solid #00e676; color: #00e676; }
+    .alert-error { background: rgba(239,83,80,0.1); border: 1px solid #ef5350; color: #ef5350; }
+    .alert-info { background: rgba(0,188,212,0.1); border: 1px solid #00bcd4; color: #00bcd4; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-bar input { flex: 1; }
+    .league-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .league-card { background: #111620; border: 2px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .league-card:hover { border-color: #00bcd4; }
+    .league-card.selected { border-color: #00e676; background: rgba(0,230,118,0.05); }
+    .league-name { font-weight: 700; margin-bottom: 4px; }
+    .league-sub { font-size: 0.75rem; color: #8b95aa; }
+    .progress-bar { height: 8px; background: #111620; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .progress-fill { height: 100%; background: #00e676; border-radius: 4px; transition: width 0.3s; }
+    .clue-list { display: flex; flex-direction: column; gap: 8px; }
+    .clue-row { display: flex; gap: 8px; align-items: center; }
+    .clue-num { width: 28px; height: 28px; background: #00e676; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; flex-shrink: 0; }
+    .clue-row input { flex: 1; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-green { background: #00e676; }
+    .status-red { background: #ef5350; }
+    @media(max-width:768px) { .form-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2,1fr); } .league-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Soccer Who Am I - Admin Panel</h1>
+    <span id="connStatus"><span class="status-dot status-red"></span>Connecting...</span>
+    <div style="margin-left:auto">
+      <span id="headerCount" style="color:#00e676;font-weight:700;font-size:1.2rem">-</span>
+      <span style="color:#8b95aa"> players loaded</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('dashboard', this)">Dashboard</button>
+      <button class="tab" onclick="switchTab('addPlayer', this)">Add Player</button>
+      <button class="tab" onclick="switchTab('managePlayers', this)">Manage Players</button>
+      <button class="tab" onclick="switchTab('importAPI', this)">Import from API</button>
+    </div>
+
+    <div id="dashboard" class="panel active">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="totalPlayers">...</div><div class="stat-label">Total Players</div></div>
+        <div class="stat-card"><div class="stat-number" id="easyCount" style="color:#64b5f6">...</div><div class="stat-label">Easy</div></div>
+        <div class="stat-card"><div class="stat-number" id="mediumCount" style="color:#ffb74d">...</div><div class="stat-label">Medium</div></div>
+        <div class="stat-card"><div class="stat-number" id="hardCount" style="color:#ef5350">...</div><div class="stat-label">Hard</div></div>
+      </div>
+      <div class="card">
+        <h2>Server Status</h2>
+        <div id="serverStatus">Checking...</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="switchTab('addPlayer', document.querySelectorAll('.tab')[1])">+ Add New Player</button>
+          <button class="btn btn-secondary" onclick="switchTab('importAPI', document.querySelectorAll('.tab')[3])">Import from API</button>
+          <button class="btn btn-secondary" onclick="loadDashboard()">Refresh Stats</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Recent Leaderboard</h2>
+        <div id="leaderboardDiv">Loading...</div>
+      </div>
+    </div>
+
+    <div id="addPlayer" class="panel">
+      <div class="card">
+        <h2>Add New Player</h2>
+        <div id="addMsg"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name *</label><input id="pName" placeholder="e.g. Lionel Messi" /></div>
+          <div class="form-group"><label>Nationality *</label><input id="pNationality" placeholder="e.g. Argentine" /></div>
+          <div class="form-group"><label>Position</label>
+            <select id="pPosition"><option>Forward</option><option>Striker</option><option>Midfielder</option><option>Attacking Midfielder</option><option>Defender</option><option>Right Back</option><option>Left Back</option><option>Goalkeeper</option></select>
+          </div>
+          <div class="form-group"><label>Difficulty</label>
+            <select id="pDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+          </div>
+          <div class="form-group"><label>Current Club *</label><input id="pCurrentClub" placeholder="e.g. Real Madrid" /></div>
+          <div class="form-group"><label>League</label><input id="pLeague" placeholder="e.g. La Liga" /></div>
+          <div class="form-group"><label>Age</label><input id="pAge" type="number" placeholder="27" /></div>
+          <div class="form-group"><label>Height</label><input id="pHeight" placeholder="e.g. 1.80m" /></div>
+          <div class="form-group"><label>Shirt Number</label><input id="pNumber" type="number" placeholder="10" /></div>
+          <div class="form-group"><label>Goals</label><input id="pGoals" type="number" placeholder="0" /></div>
+          <div class="form-group"><label>Assists</label><input id="pAssists" type="number" placeholder="0" /></div>
+          <div class="form-group"><label>Appearances</label><input id="pApps" type="number" placeholder="0" /></div>
+          <div class="form-group full"><label>Former Clubs (comma separated)</label><input id="pFormer" placeholder="Barcelona, PSG, Santos" /></div>
+          <div class="form-group full"><label>Trophies (comma separated)</label><input id="pTrophies" placeholder="World Cup 2022, Champions League 2019" /></div>
+          <div class="form-group full"><label>Famous Moments (comma separated)</label><input id="pMoments" placeholder="Scored in World Cup Final" /></div>
+          <div class="form-group full"><label>Photo URL (optional)</label><input id="pPhoto" placeholder="https://upload.wikimedia.org/..." /></div>
+        </div>
+        <div style="margin-top:20px">
+          <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#8b95aa;display:block;margin-bottom:10px">7 Clues (least obvious to most obvious) *</label>
+          <div class="clue-list">
+            <div class="clue-row"><div class="clue-num">1</div><input class="clue" placeholder="Hardest clue - least obvious" /></div>
+            <div class="clue-row"><div class="clue-num">2</div><input class="clue" placeholder="Clue 2" /></div>
+            <div class="clue-row"><div class="clue-num">3</div><input class="clue" placeholder="Clue 3" /></div>
+            <div class="clue-row"><div class="clue-num">4</div><input class="clue" placeholder="Clue 4" /></div>
+            <div class="clue-row"><div class="clue-num">5</div><input class="clue" placeholder="Clue 5" /></div>
+            <div class="clue-row"><div class="clue-num">6</div><input class="clue" placeholder="Clue 6" /></div>
+            <div class="clue-row"><div class="clue-num">7</div><input class="clue" placeholder="Easiest clue - most obvious" /></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="savePlayer()">Save Player</button>
+          <button class="btn btn-secondary" onclick="autoClues()">Auto Generate Clues</button>
+          <button class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="managePlayers" class="panel">
+      <div class="card">
+        <h2>All Players</h2>
+        <div class="search-bar">
+          <input id="searchInput" placeholder="Search by name, nationality or club..." oninput="renderTable()" />
+          <select id="diffFilter" onchange="renderTable()">
+            <option value="">All Difficulties</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <button class="btn btn-secondary" onclick="loadPlayers()">Refresh</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="players-table">
+            <thead><tr><th>ID</th><th>Name</th><th>Nationality</th><th>Position</th><th>Club</th><th>Difficulty</th><th>Goals</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="pagination" style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+
+    <div id="importAPI" class="panel">
+      <div class="card">
+        <h2>Import from Football API</h2>
+        <p style="color:#8b95aa;margin-bottom:20px;font-size:0.9rem">Click leagues to select them then import top scorers automatically.</p>
+        <div class="league-grid">
+          <div class="league-card selected" data-id="39" onclick="this.classList.toggle('selected')"><div class="league-name">Premier League</div><div class="league-sub">England</div></div>
+          <div class="league-card selected" data-id="140" onclick="this.classList.toggle('selected')"><div class="league-name">La Liga</div><div class="league-sub">Spain</div></div>
+          <div class="league-card selected" data-id="78" onclick="this.classList.toggle('selected')"><div class="league-name">Bundesliga</div><div class="league-sub">Germany</div></div>
+          <div class="league-card selected" data-id="135" onclick="this.classList.toggle('selected')"><div class="league-name">Serie A</div><div class="league-sub">Italy</div></div>
+          <div class="league-card selected" data-id="61" onclick="this.classList.toggle('selected')"><div class="league-name">Ligue 1</div><div class="league-sub">France</div></div>
+          <div class="league-card" data-id="2" onclick="this.classList.toggle('selected')"><div class="league-name">Champions League</div><div class="league-sub">Europe</div></div>
+          <div class="league-card" data-id="253" onclick="this.classList.toggle('selected')"><div class="league-name">MLS</div><div class="league-sub">USA</div></div>
+          <div class="league-card" data-id="6" onclick="this.classList.toggle('selected')"><div class="league-name">African Nations</div><div class="league-sub">AFCON</div></div>
+          <div class="league-card" data-id="1" onclick="this.classList.toggle('selected')"><div class="league-name">World Cup</div><div class="league-sub">FIFA</div></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runImport()">Import Selected Leagues</button>
+          <button class="btn btn-secondary" onclick="testFootballAPI()">Test Football API</button>
+        </div>
+        <div id="importProgress" style="display:none;margin-top:16px">
+          <div id="importStatus" style="color:#8b95aa;margin-bottom:8px">Importing...</div>
+          <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+        </div>
+        <div id="importMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE = window.location.origin;
+    let players = [];
+    let page = 1;
+    const PER_PAGE = 25;
+
+    async function api(path, opts) {
+      const res = await fetch(BASE + path, opts);
+      return res.json();
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await api("/api/players");
+        players = data.players || [];
+        const total = players.length;
+        document.getElementById("totalPlayers").textContent = total;
+        document.getElementById("headerCount").textContent = total;
+        document.getElementById("easyCount").textContent = players.filter(p => p.difficulty === "easy").length;
+        document.getElementById("mediumCount").textContent = players.filter(p => p.difficulty === "medium").length;
+        document.getElementById("hardCount").textContent = players.filter(p => p.difficulty === "hard").length;
+        document.getElementById("connStatus").innerHTML = '<span class="status-dot status-green"></span>Connected';
+        document.getElementById("serverStatus").innerHTML = '<div class="alert alert-success">Backend connected! ' + total + ' players loaded.</div>';
+      } catch(e) {
+        document.getElementById("serverStatus").innerHTML = '<div class="alert alert-error">Cannot connect to backend. Make sure node server.js is running!</div>';
+        document.getElementById("connStatus").innerHTML = '<span class="status-dot status-red"></span>Disconnected';
+      }
+      try {
+        const lb = await api("/api/leaderboard");
+        const scores = lb.leaderboard || [];
+        document.getElementById("leaderboardDiv").innerHTML = scores.length === 0
+          ? '<p style="color:#8b95aa">No scores yet. Play the game!</p>'
+          : scores.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:#ffd600;font-weight:700">#${i+1}</span><span>${e.name}</span><span style="color:#8b95aa">${e.playerName}</span><span style="color:#00e676;font-weight:700">${(e.score||0).toLocaleString()}</span></div>`).join("");
+      } catch(e) {}
+    }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if (btn) btn.classList.add("active");
+      if (id === "managePlayers") loadPlayers();
+      if (id === "dashboard") loadDashboard();
+    }
+
+    async function loadPlayers() {
+      if (players.length === 0) {
+        const data = await api("/api/players");
+        players = data.players || [];
+      }
+      renderTable();
+    }
+
+    function renderTable() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const diff = document.getElementById("diffFilter").value;
+      let filtered = players;
+      if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.nationality||"").toLowerCase().includes(search) || (p.currentClub||"").toLowerCase().includes(search));
+      if (diff) filtered = filtered.filter(p => p.difficulty === diff);
+      const start = (page - 1) * PER_PAGE;
+      const slice = filtered.slice(start, start + PER_PAGE);
+      document.getElementById("tbody").innerHTML = slice.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;color:#8b95aa;padding:40px">No players found</td></tr>'
+        : slice.map(p => `<tr><td style="color:#8b95aa;font-size:0.8rem">${p.id}</td><td style="font-weight:700">${p.name}</td><td style="color:#8b95aa">${p.nationality||""}</td><td style="color:#8b95aa">${p.position||""}</td><td>${p.currentClub||""}</td><td><span class="diff-badge diff-${p.difficulty}">${p.difficulty}</span></td><td style="color:#00e676;font-weight:700">${p.stats?.goals||0}</td></tr>`).join("");
+      const pages = Math.ceil(filtered.length / PER_PAGE);
+      document.getElementById("pagination").innerHTML = Array.from({length: Math.min(pages,10)}, (_,i) =>
+        `<button class="btn ${i+1===page?'btn-primary':'btn-secondary'}" style="padding:6px 12px" onclick="page=${i+1};renderTable()">${i+1}</button>`).join("");
+    }
+
+    async function savePlayer() {
+      const name = document.getElementById("pName").value.trim();
+      const club = document.getElementById("pCurrentClub").value.trim();
+      const clues = Array.from(document.querySelectorAll(".clue")).map(i => i.value.trim()).filter(Boolean);
+      if (!name) { showMsg("addMsg", "Player name is required!", "error"); return; }
+      if (!club) { showMsg("addMsg", "Current club is required!", "error"); return; }
+      if (clues.length < 3) { showMsg("addMsg", "Please add at least 3 clues!", "error"); return; }
+      const player = {
+        name, clues,
+        nationality: document.getElementById("pNationality").value.trim(),
+        position: document.getElementById("pPosition").value,
+        difficulty: document.getElementById("pDifficulty").value,
+        currentClub: club,
+        league: document.getElementById("pLeague").value.trim(),
+        age: parseInt(document.getElementById("pAge").value) || null,
+        height: document.getElementById("pHeight").value.trim(),
+        number: parseInt(document.getElementById("pNumber").value) || 0,
+        stats: { goals: parseInt(document.getElementById("pGoals").value)||0, assists: parseInt(document.getElementById("pAssists").value)||0, appearances: parseInt(document.getElementById("pApps").value)||0 },
+        formerClubs: document.getElementById("pFormer").value.split(",").map(s=>s.trim()).filter(Boolean),
+        trophies: document.getElementById("pTrophies").value.split(",").map(s=>s.trim()).filter(Boolean),
+        famousMoments: document.getElementById("pMoments").value.split(",").map(s=>s.trim()).filter(Boolean),
+        photo: document.getElementById("pPhoto").value.trim()||null,
+        emoji: name.split(" ").map(n=>n[0]).join(""),
+        category: "player"
+      };
+      try {
+        const data = await api("/api/admin/player", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(player) });
+        if (data.success) { showMsg("addMsg", name + " added successfully!", "success"); clearForm(); loadDashboard(); }
+        else showMsg("addMsg", data.error || "Failed to add player", "error");
+      } catch(e) { showMsg("addMsg", "Connection error: " + e.message, "error"); }
+    }
+
+    function autoClues() {
+      const name = document.getElementById("pName").value;
+      const nat = document.getElementById("pNationality").value;
+      const pos = document.getElementById("pPosition").value;
+      const club = document.getElementById("pCurrentClub").value;
+      const age = document.getElementById("pAge").value;
+      const height = document.getElementById("pHeight").value;
+      const goals = document.getElementById("pGoals").value;
+      const clues = document.querySelectorAll(".clue");
+      const generated = [
+        nat && pos ? "I am " + nat + " and play as a " + pos + "." : "",
+        club ? "I currently play for " + club + "." : "",
+        goals > 50 ? "I have scored over " + goals + " career goals." : "I am known for my skill and dedication.",
+        age ? "I am " + age + " years old." : "I have played football for many years.",
+        height ? "I stand " + height + " tall." : "I am a professional footballer.",
+        "I have represented my country at international level.",
+        name ? "My name starts with the letter " + name[0] + "." : "I am one of the greats of the game."
+      ];
+      clues.forEach((input, i) => { if (generated[i]) input.value = generated[i]; });
+    }
+
+    function clearForm() {
+      ["pName","pNationality","pCurrentClub","pLeague","pAge","pHeight","pNumber","pGoals","pAssists","pApps","pFormer","pTrophies","pMoments","pPhoto"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+      document.querySelectorAll(".clue").forEach(i => i.value = "");
+    }
+
+    function showMsg(id, msg, type) {
+      document.getElementById(id).innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>';
+      setTimeout(() => { const el = document.getElementById(id); if(el) el.innerHTML = ""; }, 5000);
+    }
+
+    async function testFootballAPI() {
+      showMsg("importMsg", "Testing Football API...", "info");
+      try {
+        const data = await api("/api/football/topscorers/premierLeague");
+        if (data.count > 0) showMsg("importMsg", "Football API working! Found " + data.count + " Premier League top scorers.", "success");
+        else showMsg("importMsg", "API returned no data. Check FOOTBALL_API_KEY in .env", "error");
+      } catch(e) { showMsg("importMsg", "Test failed: " + e.message, "error"); }
+    }
+
+    async function runImport() {
+      const selected = Array.from(document.querySelectorAll(".league-card.selected")).map(el => el.dataset.id);
+      if (selected.length === 0) { showMsg("importMsg", "Please select at least one league!", "error"); return; }
+      document.getElementById("importProgress").style.display = "block";
+      document.getElementById("importMsg").innerHTML = "";
+      let total = 0;
+      for (let i = 0; i < selected.length; i++) {
+        document.getElementById("importStatus").textContent = "Importing " + (i+1) + " of " + selected.length + " leagues...";
+        document.getElementById("progFill").style.width = ((i / selected.length) * 100) + "%";
+        try {
+          const data = await api("/api/football/topscorers/" + selected[i]);
+          total += data.count || 0;
+        } catch(e) {}
+        await new Promise(r => setTimeout(r, 1200));
+      }
+      document.getElementById("progFill").style.width = "100%";
+      document.getElementById("importStatus").textContent = "Complete!";
+      showMsg("importMsg", "Fetched " + total + " players from " + selected.length + " leagues! Run node importPlayers.js in PowerShell to save them to the game.", "success");
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+import { useState, useEffect, useRef } from "react";
+import { gameAPI, leaderboardAPI } from "../api";
+import { playSound } from "../utils/sounds";
+import { updateStats } from "./AchievementsPage";
+
+const DIFFS = [
+  { id: "easy",   label: "Easy",   icon: "⚽", desc: "7 clues \u00B7 7 guesses", color: "#00e676" },
+  { id: "medium", label: "Medium", icon: "\uD83E\uDD14", desc: "5 clues \u00B7 5 guesses", color: "#f0b429" },
+  { id: "hard",   label: "Hard",   icon: "\uD83D\uDE30", desc: "3 clues \u00B7 3 guesses \u00B7 15s timer", color: "#ff3d57" },
+];
+
+export default function GamePage() {
+  const [phase, setPhase]           = useState("home");
+  const [selectedDiff, setDiff]     = useState("easy");
+  const [game, setGame]             = useState(null);
+  const [clues, setClues]           = useState([]);
+  const [guess, setGuess]           = useState("");
+  const [result, setResult]         = useState(null);
+  const [score, setScore]           = useState(0);
+  const [timeLeft, setTimeLeft]     = useState(15);
+  const [timerActive, setTimerActive] = useState(false);
+  const [guessesUsed, setGuessesUsed] = useState(0);
+  const [newAchievements, setNewAchievements] = useState([]);
+  const [showName, setShowName]     = useState("");
+  const [showLB, setShowLB]         = useState(false);
+  const timerRef = useRef(null);
+  const timeLeftRef = useRef(15);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("playerName");
+    if (saved) setShowName(saved);
+  }, []);
+
+  useEffect(() => {
+    if (!timerActive) return;
+    timeLeftRef.current = 15;
+    timerRef.current = setInterval(() => {
+      timeLeftRef.current -= 1;
+      setTimeLeft(timeLeftRef.current);
+      if (timeLeftRef.current <= 0) {
+        clearInterval(timerRef.current);
+        handleTimeout();
+      }
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [timerActive]);
+
+  const handleTimeout = async () => {
+    setTimerActive(false);
+    playSound("gameover");
+    if (game?.sessionId) {
+      const r = await gameAPI.submitGuess(game.sessionId, "__timeout__");
+      setResult({ ...r, timeout: true });
+      setPhase("result");
+    }
+  };
+
+  const startGame = async () => {
+    playSound("start");
+    const data = await gameAPI.start(selectedDiff);
+    setGame(data);
+    setClues([data.firstClue]);
+    setGuess("");
+    setResult(null);
+    setGuessesUsed(0);
+    setTimeLeft(15);
+    setPhase("playing");
+    if (selectedDiff === "hard") setTimerActive(true);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const getClue = async () => {
+    if (!game) return;
+    playSound("clue");
+    const data = await gameAPI.getClue(game.sessionId);
+    if (data.clue) setClues(c => [...c, data.clue]);
+  };
+
+  const submitGuess = async () => {
+    if (!guess.trim() || !game) return;
+    clearInterval(timerRef.current);
+    setTimerActive(false);
+    playSound(guess.trim() ? "correct" : "wrong");
+    const data = await gameAPI.submitGuess(game.sessionId, guess);
+    setGuessesUsed(g => g + 1);
+    if (data.correct) {
+      playSound("correct");
+      setScore(s => s + (data.score || 100));
+      const { newUnlocked } = updateStats({
+        correct: true, difficulty: selectedDiff,
+        cluesUsed: clues.length, maxClues: selectedDiff === "hard" ? 3 : selectedDiff === "medium" ? 5 : 7,
+        guessesLeft: data.guessesLeft, playerName: data.answer,
+        playerNationality: data.playerData?.nationality, timeUsed: 15 - timeLeft
+      });
+      if (newUnlocked.length > 0) {
+        setNewAchievements(newUnlocked);
+        setTimeout(() => setNewAchievements([]), 4000);
+      }
+      setResult(data);
+      setPhase("result");
+    } else if (data.gameOver || data.failed) {
+      playSound("gameover");
+      updateStats({ correct: false });
+      setResult(data);
+      setPhase("result");
+    } else {
+      playSound("wrong");
+      setGuessesUsed(g => g + 1);
+    }
+    setGuess("");
+  };
+
+  const saveScore = async () => {
+    if (!showName.trim()) return;
+    localStorage.setItem("playerName", showName);
+    await leaderboardAPI.add(showName, score, result?.answer, selectedDiff);
+    setShowLB(true);
+  };
+
+  const maxGuesses = selectedDiff === "hard" ? 3 : selectedDiff === "medium" ? 5 : 7;
+  const maxClues   = selectedDiff === "hard" ? 3 : selectedDiff === "medium" ? 5 : 7;
+
+  if (phase === "home") return (
+    <div className="game-page">
+      <svg className="field-lines" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="340" cy="210" r="80" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.18"/><circle cx="340" cy="210" r="3" fill="#1ecfff" fillOpacity="0.35"/><line x1="340" y1="60" x2="340" y2="360" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.14"/></svg>
+      <div className="game-hero">
+        <div className="hero-eyebrow">⚽ The Ultimate Soccer Trivia Game</div>
+        <h1>WHO<br/>AM I?</h1>
+        <p>Read the clues. Guess the legend. Beat the clock.</p>
+      </div>
+
+      <div className="diff-selector">
+        {DIFFS.map(d => (
+          <div
+            key={d.id}
+            className={"diff-card " + d.id + (selectedDiff === d.id ? " selected" : "")}
+            onClick={() => setDiff(d.id)}
+          >
+            <div className="diff-card-icon">{d.icon}</div>
+            <div className="diff-card-name">{d.label}</div>
+            <div className="diff-card-desc">{d.desc}</div>
+            {selectedDiff === d.id && <div className="diff-selected-mark" style={{color:d.color}}>✓ Selected</div>}
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-primary btn-start" onClick={startGame}>
+        <span>⚡</span> Kick Off
+      </button>
+
+      <div className="how-to-play">
+        <h3>How to Play</h3>
+        <div className="htp-grid">
+          <div className="htp-step"><span className="htp-num">1</span><div><strong>Read the clue</strong><p>A mystery player is revealed one clue at a time</p></div></div>
+          <div className="htp-step"><span className="htp-num">2</span><div><strong>Make your guess</strong><p>Type the player name &mdash; fewer clues means more points</p></div></div>
+          <div className="htp-step"><span className="htp-num">3</span><div><strong>Score big</strong><p>Hard mode adds a 15 second timer for maximum pressure</p></div></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (phase === "playing") return (
+    <div className="game-page">
+      <div className="game-card">
+        <div className="game-card-header">
+          <div className="game-status">
+            <div className="game-stat">
+              <div className="game-stat-val">{clues.length}</div>
+              <div className="game-stat-label">Clues</div>
+            </div>
+            <div className="game-stat">
+              <div className="game-stat-val">{maxGuesses - guessesUsed}</div>
+              <div className="game-stat-label">Guesses Left</div>
+            </div>
+            <div className="game-stat">
+              <div className="game-stat-val">{score}</div>
+              <div className="game-stat-label">Score</div>
+            </div>
+          </div>
+          {selectedDiff === "hard" && (
+            <div className={"game-timer" + (timeLeft <= 5 ? " urgent" : "")}>
+              {String(timeLeft).padStart(2, "0")}s
+            </div>
+          )}
+          <span className={"diff-tag diff-tag--" + selectedDiff}>{selectedDiff}</span>
+        </div>
+
+        <div className="guess-dots">
+          {Array.from({length: maxGuesses}).map((_, i) => (
+            <div key={i} className={"guess-dot" + (i < guessesUsed ? " used" : i === guessesUsed ? " active" : "")} />
+          ))}
+        </div>
+
+        <div className="clues-list">
+          {clues.map((c, i) => (
+            <div key={i} className="clue-item">
+              <span className="clue-number">CLUE {i + 1}</span>
+              {c}
+            </div>
+          ))}
+        </div>
+
+        <div className="guess-area">
+          <input
+            ref={inputRef}
+            className="guess-input"
+            value={guess}
+            onChange={e => setGuess(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && submitGuess()}
+            placeholder="Type player name and press Enter..."
+          />
+          <button className="btn btn-primary" onClick={submitGuess}>Guess</button>
+          {clues.length < maxClues && (
+            <button className="btn btn-ghost" onClick={getClue}>+Clue</button>
+          )}
+        </div>
+      </div>
+
+      {newAchievements.map((a, i) => (
+        <div key={i} className="achievement-toast">
+          <span className="toast-icon">{a.icon}</span>
+          <div><div className="toast-label">Achievement Unlocked!</div><div className="toast-title">{a.title}</div><div className="toast-desc">{a.desc}</div></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (phase === "result") return (
+    <div className="game-page">
+      <div className="game-card">
+        <div className={"result-banner" + (result?.correct ? " correct" : " wrong")}>
+          <span className="result-emoji">{result?.correct ? "\uD83C\uDF89" : result?.timeout ? "\u23F0" : "\uD83D\uDE14"}</span>
+          <div className="result-title">{result?.correct ? "Correct!" : result?.timeout ? "Time's Up!" : "Game Over"}</div>
+          <div className="result-answer">The answer was <strong>{result?.answer}</strong></div>
+          {result?.correct && <div className="result-score">+{result?.score || 100} pts</div>}
+        </div>
+
+        {result?.correct && (
+          <div style={{padding:"0 24px 24px"}}>
+            <div style={{display:"flex",gap:"8px",marginBottom:"8px"}}>
+              <input
+                className="guess-input"
+                value={showName}
+                onChange={e => setShowName(e.target.value)}
+                placeholder="Your name for leaderboard..."
+              />
+              <button className="btn btn-gold" onClick={saveScore}>Save</button>
+            </div>
+          </div>
+        )}
+
+        <div style={{padding:"0 24px 24px",display:"flex",gap:"10px",flexWrap:"wrap"}}>
+          <button className="btn btn-primary" onClick={startGame}>Play Again</button>
+          <button className="btn btn-ghost" onClick={() => setPhase("home")}>Home</button>
+        </div>
+      </div>
+    </div>
+  );
+}
