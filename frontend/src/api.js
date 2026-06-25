@@ -1,4 +1,4 @@
-const BASE_URL = "/api";
+const BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:3001") + "/api";
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
