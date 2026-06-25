@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API = "/api/daily";
+const API = (process.env.REACT_APP_API_URL || "http://localhost:3001") + "/api/daily";
 function getTodayKey() {
   const now = new Date();
   return now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
