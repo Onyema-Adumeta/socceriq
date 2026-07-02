@@ -123,9 +123,33 @@ export default function GamePage() {
 
   if (phase === "home") return (
     <div className="game-page">
-      <svg className="field-lines" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="340" cy="210" r="80" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.18"/><circle cx="340" cy="210" r="3" fill="#1ecfff" fillOpacity="0.35"/><line x1="340" y1="60" x2="340" y2="360" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.14"/></svg>
+      <svg className="field-lines" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="pitchGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#00c6ff" stopOpacity="0.08"/>
+            <stop offset="100%" stopColor="#00c6ff" stopOpacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#pitchGlow)"/>
+        <rect x="60" y="40" width="1080" height="620" rx="4" fill="none" stroke="#1ecfff" strokeWidth="1.5" strokeOpacity="0.2"/>
+        <line x1="600" y1="40" x2="600" y2="660" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.18"/>
+        <circle cx="600" cy="350" r="140" fill="none" stroke="#1ecfff" strokeWidth="1.5" strokeOpacity="0.2"/>
+        <circle cx="600" cy="350" r="5" fill="#1ecfff" fillOpacity="0.5"/>
+        <rect x="60" y="210" width="180" height="280" rx="2" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.18"/>
+        <rect x="60" y="270" width="80" height="160" rx="2" fill="none" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.13"/>
+        <path d="M 240 230 Q 290 350 240 470" fill="none" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.13"/>
+        <rect x="960" y="210" width="180" height="280" rx="2" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.18"/>
+        <rect x="1060" y="270" width="80" height="160" rx="2" fill="none" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.13"/>
+        <path d="M 960 230 Q 910 350 960 470" fill="none" stroke="#1ecfff" strokeWidth="1" strokeOpacity="0.13"/>
+        <path d="M 60 60 Q 80 40 100 40" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.2"/>
+        <path d="M 1100 40 Q 1120 40 1140 60" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.2"/>
+        <path d="M 60 640 Q 60 660 80 660" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.2"/>
+        <path d="M 1120 660 Q 1140 660 1140 640" fill="none" stroke="#1ecfff" strokeWidth="1.2" strokeOpacity="0.2"/>
+        <circle cx="240" cy="350" r="4" fill="#1ecfff" fillOpacity="0.3"/>
+        <circle cx="960" cy="350" r="4" fill="#1ecfff" fillOpacity="0.3"/>
+      </svg>
       <div className="game-hero">
-        <div className="hero-eyebrow">⚽ The Ultimate Soccer Trivia Game</div>
+        <div className="hero-eyebrow">⚽ The Ultimate Football Trivia Game</div>
         <h1>WHO<br/>AM I?</h1>
         <p>Read the clues. Guess the legend. Beat the clock.</p>
       </div>

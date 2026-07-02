@@ -12,7 +12,7 @@ export default function Nav({ currentPage, setPage, theme, setTheme }) {
     <nav className="nav">
       <div className="nav-logo" onClick={() => setPage("game")}>
         <div className="nav-logo-icon">⚽</div>
-        <div className="nav-logo-text">Soccer<span>IQ</span></div>
+        <div className="nav-logo-text">Football<span>Genius</span></div>
       </div>
       <ul className="nav-links">
         {links.map(l => (
