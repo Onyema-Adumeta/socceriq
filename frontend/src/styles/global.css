@@ -2295,3 +2295,16 @@ body::before {
   .deck-grid { grid-template-columns: 1fr !important; }
   .achievements-stats { grid-template-columns: repeat(2, 1fr) !important; }
 }
+/* ── AI Chat Button Shrink ── */
+.chatbot-toggle {
+  position: fixed !important;
+  bottom: 16px !important;
+  right: 16px !important;
+  padding: 8px 14px !important;
+  font-size: 0.75rem !important;
+  border-radius: 20px !important;
+  z-index: 999 !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s !important;
+}
+.chatbot-toggle:hover { opacity: 1 !important; }
