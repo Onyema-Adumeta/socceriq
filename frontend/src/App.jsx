@@ -17,7 +17,7 @@ export default function App() {
   const CurrentPage = pages[page] || GamePage;
   return (
     <div className="app">
-      <Nav currentPage={page} setPage={setPage} theme={darkMode ? "dark" : "light"} setTheme={(fn) => setDarkMode(prev => fn(prev ? "dark" : "light") === "dark")} />
+      <Nav currentPage={page} setPage={setPage} theme={darkMode ? "dark" : "light"} setTheme={() => setDarkMode(d => !d)} />
       <main className="app-main"><CurrentPage /></main>
       <ChatBot />
     </div>

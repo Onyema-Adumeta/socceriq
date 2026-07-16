@@ -2236,3 +2236,62 @@ body::before {
   pointer-events: none !important;
   z-index: 0 !important;
 }
+/* ── Mobile Fixes ── */
+@media (max-width: 768px) {
+  /* Nav */
+  .nav { padding: 10px 12px; flex-wrap: nowrap; overflow-x: auto; gap: 8px; }
+  .nav-logo-text { font-size: 0.9rem; }
+  .nav-links { gap: 4px; flex-shrink: 0; }
+  .nav-link { padding: 6px 10px; font-size: 0.7rem; letter-spacing: 0.5px; }
+  .nav-theme-btn { font-size: 0.75rem; padding: 6px 10px; flex-shrink: 0; }
+
+  /* Hero */
+  .game-hero { padding-top: 60px !important; padding-bottom: 16px; }
+  .game-hero h1 { font-size: clamp(3.5rem, 18vw, 6rem) !important; }
+  .hero-eyebrow { font-size: 0.65rem !important; padding: 5px 12px !important; }
+
+  /* Diff cards - horizontal scroll on mobile */
+  .diff-selector { flex-direction: column !important; padding: 0 16px; gap: 10px; }
+  .diff-card { padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; }
+  .diff-card-icon { font-size: 1.8rem; }
+  .diff-card-name { font-size: 1rem; }
+  .diff-card-desc { font-size: 0.75rem; }
+
+  /* Kick off button */
+  .btn-start { margin: 16px; width: calc(100% - 32px); }
+
+  /* How to play */
+  .htp-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .how-to-play { padding: 0 16px 40px; }
+
+  /* Game card */
+  .game-card { margin: 8px; border-radius: 12px; }
+  .guess-area { flex-wrap: wrap; gap: 8px; }
+  .guess-input { width: 100%; }
+  .guess-area .btn { flex: 1; }
+
+  /* Daily */
+  .daily-header { padding: 24px 16px 16px; }
+  .daily-title { font-size: 1.5rem; }
+
+  /* Leaderboard */
+  .lb-podium { gap: 8px; }
+  .lb-row2 { padding: 10px 12px; gap: 8px; }
+  .lb-row2-diff { display: none; }
+
+  /* Flashcards */
+  .deck-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; padding: 0 12px 40px; }
+  .fc-nav { padding: 12px 16px 24px; }
+
+  /* Achievements */
+  .achievements-grid { grid-template-columns: 1fr !important; }
+  .achievements-stats { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Players */
+  .players-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .deck-grid { grid-template-columns: 1fr !important; }
+  .achievements-stats { grid-template-columns: repeat(2, 1fr) !important; }
+}
