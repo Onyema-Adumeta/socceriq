@@ -26,9 +26,7 @@ export default function Nav({ currentPage, setPage, theme, setTheme }) {
           </li>
         ))}
       </ul>
-      <button className="nav-theme-btn" onClick={setTheme}>
-        {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
-      </button>
+      
     </nav>
   );
 }
