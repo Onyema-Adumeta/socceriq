@@ -2308,3 +2308,60 @@ body::before {
   transition: opacity 0.2s !important;
 }
 .chatbot-toggle:hover { opacity: 1 !important; }
+/* Defines the falling animation - piece starts at top, falls to bottom while spinning */
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Player photo circle on the result screen */
+.result-player-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;        /* Makes it a circle */
+  object-fit: cover;         /* Crops image to fit without stretching */
+  border: 3px solid var(--teal);
+  margin: 16px auto;         /* Centers it horizontally */
+  display: block;
+  box-shadow: 0 0 24px rgba(0,198,255,0.4);  /* Glowing teal shadow */
+  animation: photoReveal 0.5s ease;           /* Pops in with scale animation */
+}
+
+/* Fallback initials circle when no photo exists */
+.result-player-initials {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), #0047ab);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 16px auto;
+  box-shadow: 0 0 24px rgba(0,198,255,0.4);
+  animation: photoReveal 0.5s ease;
+}
+
+/* Photo pop-in animation - scales from 50% to full size */
+@keyframes photoReveal {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* Gold streak banner shown below the score */
+.streak-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(240,180,41,0.15), rgba(240,180,41,0.05));
+  border: 1px solid rgba(240,180,41,0.3);
+  border-radius: 12px;
+  padding: 12px 24px;
+  margin: 0 24px 16px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
+}
